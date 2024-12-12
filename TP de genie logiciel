@@ -1,0 +1,161 @@
+package n
+public
+
+	system sys
+	features
+		door1_info_ECAM: out data port;
+		door2_info_ECAM: out data port;
+end sys;
+
+	device door1
+	features
+		war_pres: in data port;
+		handle: out data port;
+		locked: out data port;
+end door1;
+
+	device door2
+	features
+		locked: out data port;
+		handle: out data port;
+		war_pres: in data port;
+end door2;
+
+	device LGS
+	features
+		on_ground: out data port;
+		in_fligh: out data port;
+end LGS;
+
+	device DPS
+	features
+		dps: out data port;
+end DPS;
+
+	device OCU
+	features
+		cll: in data port;
+end OCU;
+
+	process doors_prosses
+	features
+		door2_handle: in data port;
+		door2_locked: in data port;
+		door1_locked: in data port;
+		door1_handle: in data port;
+		door2_warn_pres: out data port;
+		door1_info_ECAM: out data port;
+		on_ground: in data port;
+		in_fligh: in data port;
+		dps: in data port;
+		cll: out data port;
+		door1_warn_pres: out data port;
+		door2_info_ECAM: out data port;
+end doors_prosses;
+
+	thread door_handler1
+	features
+		handle: in data port;
+		on_ground: in data port;
+		warn_pres: out data port;
+		dps: in data port;
+		in_fligh: in data port;
+		locked: in data port;
+		cll: out data port;
+		info: out data port;
+end door_handler1;
+
+	thread door_handler2
+	features
+		locked: in data port;
+		handle: in data port;
+		warn_pres: out data port;
+		dps: in data port;
+		on_ground: in data port;
+		in_fligh: in data port;
+		cll: out data port;
+		info: out data port;
+end door_handler2;
+
+	thread doors_mix
+	features
+		door1_locked: in data port;
+		door2_locked: in data port;
+		cll: out data port;
+end doors_mix;
+
+	thread implementation doors_mix.impl
+	end doors_mix.impl;
+
+	thread implementation door_handler2.impl
+	end door_handler2.impl;
+
+	thread implementation door_handler1.impl
+	end door_handler1.impl;
+
+	process implementation doors_prosses.impl
+	subcomponents
+		door_handler2: thread door_handler2.impl;
+		doors_mix: thread doors_mix.impl;
+		door_handler1: thread door_handler1.impl;
+	connections
+		doors_prosses_impl_new_connection: port doors_mix.cll -> cll;
+
+		doors_prosses_impl_new_connection2: port door1_locked -> door_handler1.locked;
+		doors_prosses_impl_new_connection3: port door1_handle -> door_handler1.handle;
+		doors_prosses_impl_new_connection4: port door_handler1.warn_pres -> door1_warn_pres;
+
+		doors_prosses_impl_new_connection5: port door2_locked -> door_handler2.locked;
+		doors_prosses_impl_new_connection6: port door2_handle -> door_handler2.handle;
+		doors_prosses_impl_new_connection7: port door_handler2.warn_pres -> door2_warn_pres;
+		doors_prosses_impl_new_connection8: port dps -> door_handler2.dps;
+		doors_prosses_impl_new_connection9: port dps -> door_handler1.dps;
+
+		doors_prosses_impl_new_connection10: port on_ground -> door_handler2.on_ground;
+		doors_prosses_impl_new_connection11: port on_ground -> door_handler1.on_ground;
+		doors_prosses_impl_new_connection12: port in_fligh -> door_handler1.in_fligh;
+		doors_prosses_impl_new_connection13: port in_fligh -> door_handler2.in_fligh;
+		doors_prosses_impl_new_connection14: port door_handler1.cll -> doors_mix.door1_locked;
+		doors_prosses_impl_new_connection15: port door_handler2.cll -> doors_mix.door2_locked;
+		doors_prosses_impl_new_connection16: port door_handler2.info -> door2_info_ECAM;
+		doors_prosses_impl_new_connection17: port door_handler1.info -> door1_info_ECAM;
+end doors_prosses.impl;
+
+	system implementation sys.impl
+	subcomponents
+		doors_process: process doors_prosses.impl;
+		Door1: device door1.impl;
+		Door2: device door2.impl;
+		LGS: device LGS.impl;
+		ocu: device OCU.impl;
+		DPS: device DPS.impl;
+	connections
+		sys_impl_new_connection: port doors_process.cll -> ocu.cll;
+		sys_impl_new_connection2: port Door1.locked -> doors_process.door1_locked;
+		sys_impl_new_connection3: port Door1.handle -> doors_process.door1_handle;
+		sys_impl_new_connection4: port doors_process.door1_warn_pres -> Door1.war_pres;
+		sys_impl_new_connection5: port Door2.locked -> doors_process.door2_locked;
+		sys_impl_new_connection6: port Door2.handle -> doors_process.door2_handle;
+		sys_impl_new_connection7: port doors_process.door2_warn_pres -> Door2.war_pres;
+		sys_impl_new_connection8: port DPS.dps -> doors_process.dps;
+		sys_impl_new_connection9: port LGS.on_ground -> doors_process.on_ground;
+		sys_impl_new_connection10: port LGS.in_fligh -> doors_process.in_fligh;
+		sys_impl_new_connection11: port doors_process.door1_info_ECAM -> door1_info_ECAM;
+		sys_impl_new_connection12: port doors_process.door2_info_ECAM -> door2_info_ECAM;
+end sys.impl;
+
+	device implementation door1.impl
+	end door1.impl;
+
+	device implementation door2.impl
+	end door2.impl;
+
+	device implementation LGS.impl
+	end LGS.impl;
+
+	device implementation DPS.impl
+	end DPS.impl;
+
+	device implementation OCU.impl
+	end OCU.impl;
+end n;
